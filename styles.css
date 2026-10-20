@@ -582,18 +582,26 @@ img {
   background: linear-gradient(135deg, #fef08a 0%, #fbbf24 40%, #f59e0b 80%, #d97706 100%);
   color: #1a0327;
   font-weight: 800;
-  font-size: .96rem;
-  padding: 15px 22px;
+  font-size: clamp(0.84rem, 2.3vw, 0.98rem);
+  padding: 15px 20px;
   border-radius: 14px;
   text-transform: uppercase;
-  letter-spacing: .03em;
+  letter-spacing: .025em;
   box-shadow: 0 10px 28px rgba(245, 158, 11, .45);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 10px;
   width: 100%;
+  box-sizing: border-box;
+  text-align: center;
+  line-height: 1.35;
   transition: transform .2s, box-shadow .2s;
+  cursor: pointer;
+  position: relative;
+  z-index: 2;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
 }
 
 .btn-hero-pay:hover {
@@ -941,7 +949,9 @@ img {
   height: 220px;
   transform: translateY(-50%);
   color: #fca5a5;
-  opacity: .18
+  opacity: .18;
+  pointer-events: none !important;
+  user-select: none;
 }
 
 .band-mandala.l {
@@ -1047,12 +1057,35 @@ img {
   color: var(--gold)
 }
 
-.callout .mandala {
+.callout .mandala,
+.mandala {
   position: absolute;
   right: -60px;
   bottom: -60px;
   width: 220px;
-  opacity: .12
+  opacity: .12;
+  pointer-events: none !important;
+  user-select: none;
+}
+
+.callout .btn,
+.callout .btn-callout-pay {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  width: 100%;
+  box-sizing: border-box;
+  font-size: clamp(0.84rem, 2.3vw, 0.98rem);
+  padding: 14px 20px;
+  border-radius: 12px;
+  line-height: 1.35;
+  margin-top: 16px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
 }
 
 /* Diwali Band & Problem Section Enhancements */
@@ -2348,6 +2381,10 @@ button,
 }
 
 /* Modal */
+body.modal-open {
+  overflow: hidden !important;
+}
+
 .modal {
   position: fixed;
   top: 0;
@@ -2737,49 +2774,50 @@ button,
 
 @media (max-width:720px) {
   body {
-    padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px))
+    padding-bottom: calc(78px + env(safe-area-inset-bottom, 0px));
+    overflow-x: hidden;
   }
 
   .section {
-    padding: 64px 0
+    padding: 48px 0;
   }
 
   .topbar .container {
     gap: 8px;
-    padding: 6px 0
+    padding: 6px 0;
   }
 
   .topbar .offer {
-    display: none
+    display: none;
   }
 
   .cd {
     gap: 3px;
-    flex-shrink: 0
+    flex-shrink: 0;
   }
 
   .cd .sep {
-    display: none
+    display: none;
   }
 
   .cd .u {
-    min-width: 33px;
-    font-size: .84rem;
+    min-width: 30px;
+    font-size: .8rem;
     padding: 2px 3px;
-    border-radius: 6px
+    border-radius: 6px;
   }
 
   .cd .u small {
-    font-size: .45rem
+    font-size: .44rem;
   }
 
   .logo {
-    padding: 5px 8px;
-    font-size: .84rem;
-    gap: 7px;
+    padding: 4px 8px;
+    font-size: .82rem;
+    gap: 6px;
     border-radius: 10px;
     flex-shrink: 0;
-    line-height: 1.1
+    line-height: 1.1;
   }
 
   .logo small {
@@ -2790,33 +2828,90 @@ button,
     font-weight: 600;
     margin-top: 1px;
     line-height: 1;
-    white-space: nowrap
+    white-space: nowrap;
   }
 
   .logo svg,
   .logo img {
-    width: 34px;
-    height: 34px;
+    width: 32px;
+    height: 32px;
     flex: none;
     object-fit: contain;
     border-radius: 0;
-    display: block
+    display: block;
+  }
+
+  .hero-info-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin: 10px 0 12px;
+  }
+
+  .hero-info-card {
+    padding: 8px 10px;
+    gap: 8px;
+    border-radius: 10px;
+  }
+
+  .hero-info-card .h-ic {
+    width: 30px;
+    height: 30px;
+  }
+
+  .hero-info-card .h-ic svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .hero-info-card small {
+    font-size: 0.65rem;
+  }
+
+  .hero-info-card b {
+    font-size: 0.82rem;
+    line-height: 1.2;
+  }
+
+  .hero-price-card {
+    padding: 14px 16px;
+    border-radius: 16px;
+    gap: 10px;
+  }
+
+  .h-price-row {
+    gap: 8px;
+    padding-bottom: 8px;
+  }
+
+  .h-price-now b {
+    font-size: 1.85rem;
+  }
+
+  .btn-hero-pay {
+    font-size: clamp(0.82rem, 3.2vw, 0.94rem);
+    padding: 13px 14px;
+    gap: 8px;
+    letter-spacing: .015em;
+  }
+
+  .btn-hero-pay svg {
+    width: 16px;
+    height: 16px;
   }
 
   .eq {
     min-width: 0;
-    padding: 16px 14px
+    padding: 14px 10px;
   }
 
   .eq b {
-    font-size: 1.05rem
+    font-size: 1rem;
   }
 
   .eq.final b {
-    font-size: 1.25rem
+    font-size: 1.15rem;
   }
 
-  .hero-info-grid,
   .info-grid,
   .pain-teaser-grid,
   .cards2,
@@ -2825,7 +2920,18 @@ button,
   .feat,
   .steps,
   .bonus-grid {
-    grid-template-columns: 1fr
+    grid-template-columns: 1fr;
+  }
+
+  .callout.callout-diwali {
+    padding: 22px 18px;
+    border-radius: 18px;
+  }
+
+  .callout .btn,
+  .callout .btn-callout-pay {
+    font-size: clamp(0.82rem, 3vw, 0.94rem);
+    padding: 13px 16px;
   }
 
   .what-get-grid {
@@ -2834,18 +2940,33 @@ button,
     margin-right: auto;
   }
 
+  .what-get-cta .btn {
+    width: 100%;
+    max-width: 440px;
+    box-sizing: border-box;
+    font-size: clamp(0.82rem, 3vw, 0.94rem);
+    padding: 13px 16px;
+  }
+
   .curr-card {
-    padding: 24px 18px;
+    padding: 20px 16px;
   }
 
   .curr-title {
-    font-size: 1.15rem;
+    font-size: 1.1rem;
   }
 
   .curr-cta-box {
-    padding: 18px 20px;
+    padding: 16px 16px;
     text-align: center;
     justify-content: center;
+  }
+
+  .curr-cta-box .btn {
+    width: 100%;
+    font-size: clamp(0.82rem, 3vw, 0.94rem);
+    padding: 13px 16px;
+    box-sizing: border-box;
   }
 
   .curr-cta-info {
@@ -2854,43 +2975,321 @@ button,
   }
 
   .price-card {
-    padding: 18px
+    padding: 18px;
   }
 
   .price-card .btn {
     margin-left: 0;
-    width: 100%
+    width: 100%;
   }
 
   .guarantee {
     flex-direction: column;
     text-align: center;
-    padding: 28px
+    padding: 24px;
+    gap: 14px;
   }
 
   .about {
-    flex-direction: column
+    flex-direction: column;
+  }
+
+  .sticky {
+    padding: 6px 12px calc(6px + env(safe-area-inset-bottom, 0px));
+    box-shadow: 0 -8px 24px rgba(18, 2, 28, .55);
+  }
+
+  .sticky .container {
+    padding: 4px 0;
+    gap: 10px;
   }
 
   .sticky .hurry,
   .sticky .cd,
   .sticky .pr s,
   .seats {
-    display: none
+    display: none;
+  }
+
+  .sticky .pr b {
+    font-size: 1.45rem;
   }
 
   .sticky .btn {
-    padding: 14px 18px;
-    font-size: .95rem
+    padding: 11px 16px;
+    font-size: .84rem;
+    white-space: nowrap;
+    border-radius: 10px;
   }
 
   .cta-strip {
     padding: 24px;
     text-align: center;
-    justify-content: center
+    justify-content: center;
   }
 
   .stack-body {
-    padding: 22px
+    padding: 20px 16px;
+  }
+
+  .stack .btn {
+    width: 100%;
+    font-size: clamp(0.82rem, 3vw, 0.94rem);
+    padding: 13px 16px;
+    box-sizing: border-box;
+  }
+
+  .final .btn {
+    width: 100%;
+    max-width: 440px;
+    font-size: clamp(0.82rem, 3vw, 0.94rem);
+    padding: 13px 16px;
+    box-sizing: border-box;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero {
+    padding: 18px 0 28px;
+  }
+
+  .hero h1,
+  .hero-title {
+    font-size: clamp(1.4rem, 6.2vw, 1.85rem);
+    line-height: 1.25;
+  }
+
+  .hero .lead,
+  .hero-lead {
+    font-size: 0.88rem;
+    line-height: 1.48;
+  }
+
+  .hero-event-tag {
+    font-size: 0.74rem;
+    padding: 4px 10px;
+  }
+
+  .hero-price-card {
+    padding: 12px 14px;
+    border-radius: 16px;
+    gap: 10px;
+  }
+
+  .h-price-row {
+    gap: 8px;
+    padding-bottom: 8px;
+  }
+
+  .h-price-old small {
+    font-size: 0.68rem;
+  }
+
+  .h-price-old s {
+    font-size: 1rem;
+  }
+
+  .h-price-arrow {
+    font-size: 1.15rem;
+  }
+
+  .h-price-now small {
+    font-size: 0.68rem;
+  }
+
+  .h-price-now b {
+    font-size: 1.7rem;
+  }
+
+  .btn-hero-pay {
+    font-size: 0.8rem;
+    padding: 12px 10px;
+    letter-spacing: .01em;
+  }
+
+  .btn-hero-pay svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  .h-seat-alert {
+    font-size: 0.72rem;
+  }
+
+  .hero-trust {
+    font-size: 0.72rem;
+    gap: 6px 10px;
+  }
+
+  .hero-pain-teaser {
+    padding: 12px;
+    border-radius: 12px;
+    margin-top: 14px;
+  }
+
+  .pain-teaser-head {
+    font-size: 0.74rem;
+  }
+
+  .pain-teaser-grid {
+    font-size: 0.78rem;
+    gap: 5px;
+  }
+
+  .callout.callout-diwali {
+    padding: 18px 14px;
+    border-radius: 16px;
+  }
+
+  .callout h3 {
+    font-size: 1.12rem;
+  }
+
+  .callout p {
+    font-size: 0.84rem;
+    line-height: 1.5;
+  }
+
+  .callout .btn,
+  .callout .btn-callout-pay {
+    font-size: 0.8rem;
+    padding: 12px 10px;
+  }
+
+  .what-get-info h3 {
+    font-size: 1.05rem;
+  }
+
+  .what-get-info p {
+    font-size: 0.82rem;
+  }
+
+  .what-get-cta .btn {
+    font-size: 0.8rem;
+    padding: 12px 10px;
+    width: 100%;
+  }
+
+  .curr-card {
+    padding: 16px 12px;
+  }
+
+  .curr-title {
+    font-size: 1.05rem;
+  }
+
+  .curr-item {
+    padding: 8px 10px;
+    font-size: 0.82rem;
+  }
+
+  .curr-cta-box {
+    padding: 14px 12px;
+  }
+
+  .curr-cta-box .btn {
+    font-size: 0.8rem;
+    padding: 12px 10px;
+    width: 100%;
+  }
+
+  .equation {
+    gap: 6px;
+  }
+
+  .eq {
+    padding: 10px 8px;
+    min-width: 0;
+  }
+
+  .eq b {
+    font-size: 0.92rem;
+  }
+
+  .eq small {
+    font-size: 0.68rem;
+  }
+
+  .eq.final b {
+    font-size: 1.05rem;
+  }
+
+  .sticky {
+    padding: 6px 10px calc(6px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .sticky .container {
+    gap: 8px;
+  }
+
+  .sticky .pr b {
+    font-size: 1.35rem;
+  }
+
+  .sticky .btn {
+    padding: 10px 14px;
+    font-size: 0.8rem;
+    letter-spacing: 0;
+  }
+
+  .modal .box.co-box {
+    padding: 18px 14px 16px;
+    margin: 10px auto;
+  }
+
+  #co-title {
+    font-size: 1.05rem;
+  }
+
+  .co-sub {
+    font-size: 0.74rem;
+  }
+
+  .co-pay {
+    font-size: 0.88rem;
+    padding: 12px 12px;
+  }
+}
+
+@media (max-width: 360px) {
+  .logo {
+    padding: 3px 6px;
+    font-size: 0.75rem;
+  }
+
+  .logo svg,
+  .logo img {
+    width: 28px;
+    height: 28px;
+  }
+
+  .cd .u {
+    min-width: 26px;
+    font-size: 0.72rem;
+    padding: 1px 2px;
+  }
+
+  .hero-info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .btn-hero-pay {
+    font-size: 0.74rem;
+    padding: 11px 8px;
+  }
+
+  .callout .btn,
+  .callout .btn-callout-pay {
+    font-size: 0.74rem;
+    padding: 11px 8px;
+  }
+
+  .sticky .pr b {
+    font-size: 1.25rem;
+  }
+
+  .sticky .btn {
+    padding: 9px 12px;
+    font-size: 0.75rem;
   }
 }

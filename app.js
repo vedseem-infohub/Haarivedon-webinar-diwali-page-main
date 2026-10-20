@@ -70,29 +70,44 @@
   /* ============================================================
      3) Open Checkout Modal on [data-pay]
      ============================================================ */
+  function openCheckout(e) {
+    if (e) {
+      if (typeof e.preventDefault === "function") e.preventDefault();
+      if (typeof e.stopPropagation === "function") e.stopPropagation();
+    }
+    if (regClosed) {
+      showModal("Registrations are closed", "Registrations for this masterclass have closed. Please contact support for the next batch.");
+      return;
+    }
+    if (!C.razorpayKeyId && !C.paymentLink) {
+      showModal("Payment not set up yet", "Add your Razorpay Key ID (razorpayKeyId) in config.js to enable registrations.");
+      return;
+    }
+    if (co) {
+      co.classList.add("show");
+      document.body.classList.add("modal-open");
+      // Focus name field smoothly on iOS & desktop
+      setTimeout(function () {
+        if (inputName) {
+          try { inputName.focus(); } catch (err) {}
+        }
+      }, 120);
+    } else {
+      startPayment({ name: "", phone: "", email: "" });
+    }
+  }
+
+  // 1. Direct event listeners on all data-pay buttons
   document.querySelectorAll("[data-pay]").forEach(function (btn) {
-    btn.addEventListener("click", function (e) {
-      e.preventDefault();
-      if (regClosed) {
-        showModal("Registrations are closed", "Registrations for this masterclass have closed. Please contact support for the next batch.");
-        return;
-      }
-      if (!C.razorpayKeyId && !C.paymentLink) {
-        showModal("Payment not set up yet", "Add your Razorpay Key ID (razorpayKeyId) in config.js to enable registrations.");
-        return;
-      }
-      if (co) {
-        co.classList.add("show");
-        // Focus name field smoothly on iOS & desktop
-        setTimeout(function () {
-          if (inputName) {
-            try { inputName.focus(); } catch (err) {}
-          }
-        }, 120);
-      } else {
-        startPayment({ name: "", phone: "", email: "" });
-      }
-    });
+    btn.addEventListener("click", openCheckout);
+  });
+
+  // 2. Global event delegation fallback (ensures clicks on nested SVG, spans, arrows always trigger)
+  document.addEventListener("click", function (e) {
+    var payBtn = e.target.closest("[data-pay]");
+    if (payBtn) {
+      openCheckout(e);
+    }
   });
 
   /* ============================================================
@@ -459,11 +474,21 @@
 
   [modal, co].forEach(function (m) {
     if (m) m.addEventListener("click", function (e) {
-      if (e.target === m || e.target.hasAttribute("data-close")) {
+      if (e.target === m || e.target.hasAttribute("data-close") || e.target.closest("[data-close]")) {
         m.classList.remove("show");
+        document.body.classList.remove("modal-open");
         setPayButtonLoading(false);
       }
     });
+  });
+
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") {
+      if (co) co.classList.remove("show");
+      if (modal) modal.classList.remove("show");
+      document.body.classList.remove("modal-open");
+      setPayButtonLoading(false);
+    }
   });
 
   if (C.mentorPhoto) {
