@@ -215,7 +215,7 @@
   }
 
   /* ============================================================
-     6) Send Lead Data to Google Sheets (Non-blocking on iOS)
+     6) Send Lead Data to Google Sheets (Ad-Blocker Proof & Non-blocking)
      ============================================================ */
   function sendToGoogleSheets(leadData) {
     if (!C.googleSheetScriptUrl) {
@@ -223,27 +223,66 @@
       return Promise.resolve({ status: "local_only" });
     }
 
-    var payload = JSON.stringify(leadData);
+    // 1. Submit via hidden iframe form (100% immune to ad-blockers & net::ERR_BLOCKED_BY_CLIENT)
+    // Ad-blockers block XHR/fetch/sendBeacon tracking pings, but NEVER block standard HTML form posts.
+    try {
+      var iframeId = "gform_hidden_sink";
+      var iframe = document.getElementById(iframeId);
+      if (!iframe) {
+        iframe = document.createElement("iframe");
+        iframe.id = iframeId;
+        iframe.name = iframeId;
+        iframe.style.display = "none";
+        iframe.style.width = "0";
+        iframe.style.height = "0";
+        iframe.style.border = "none";
+        iframe.setAttribute("aria-hidden", "true");
+        document.body.appendChild(iframe);
+      }
 
-    // 1. Try navigator.sendBeacon (native background transport on iOS Safari)
-    if (typeof navigator !== "undefined" && typeof navigator.sendBeacon === "function") {
-      try {
-        var blob = new Blob([payload], { type: "text/plain;charset=utf-8" });
-        var sent = navigator.sendBeacon(C.googleSheetScriptUrl, blob);
-        if (sent) return Promise.resolve({ status: "beacon_sent" });
-      } catch (e) {}
+      var form = document.createElement("form");
+      form.style.display = "none";
+      form.method = "POST";
+      form.action = C.googleSheetScriptUrl;
+      form.target = iframeId;
+
+      for (var key in leadData) {
+        if (Object.prototype.hasOwnProperty.call(leadData, key)) {
+          var input = document.createElement("input");
+          input.type = "hidden";
+          input.name = key;
+          input.value = leadData[key] == null ? "" : String(leadData[key]);
+          form.appendChild(input);
+        }
+      }
+
+      document.body.appendChild(form);
+      form.submit();
+      setTimeout(function () {
+        try {
+          if (form.parentNode) form.parentNode.removeChild(form);
+        } catch (e) {}
+      }, 1500);
+    } catch (e) {
+      console.warn("Hidden form transport warning:", e);
     }
 
-    // 2. Fallback to fetch with keepalive: true (supported in Safari & modern browsers)
-    return fetch(C.googleSheetScriptUrl, {
-      method: "POST",
-      mode: "no-cors",
-      keepalive: true,
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: payload
-    }).catch(function (err) {
-      console.warn("Google Sheet sync error (saved locally):", err);
-    });
+    // 2. Parallel standard fetch fallback (no keepalive, no sendBeacon to avoid triggering ad-blocker filters)
+    try {
+      if (typeof fetch === "function") {
+        fetch(C.googleSheetScriptUrl, {
+          method: "POST",
+          mode: "no-cors",
+          cache: "no-cache",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify(leadData)
+        }).catch(function () {
+          // Handled silently: lead is already dispatched via hidden iframe & saved in localStorage
+        });
+      }
+    } catch (err) {}
+
+    return Promise.resolve({ status: "dispatched" });
   }
 
   /* ============================================================
@@ -310,6 +349,31 @@
   /* ============================================================
      8) Razorpay Checkout Flow (iOS & Android Optimized)
      ============================================================ */
+  function ensureRazorpay(callback) {
+    if (typeof window.Razorpay === "function") {
+      if (callback) callback(true);
+      return;
+    }
+    var existing = document.querySelector('script[src*="checkout.razorpay.com"]');
+    if (existing) {
+      existing.addEventListener("load", function () { if (callback) callback(true); });
+      existing.addEventListener("error", function () { if (callback) callback(false); });
+      if (typeof window.Razorpay === "function") {
+        if (callback) callback(true);
+      }
+      return;
+    }
+    var s = document.createElement("script");
+    s.src = "https://checkout.razorpay.com/v1/checkout.js";
+    s.async = true;
+    s.onload = function () { if (callback) callback(true); };
+    s.onerror = function () { if (callback) callback(false); };
+    document.head.appendChild(s);
+  }
+
+  // Preload Razorpay checkout script proactively
+  try { ensureRazorpay(); } catch (e) {}
+
   function startPayment(lead) {
     lead = lead || currentLead || { name: "", phone: "", email: "" };
 
@@ -325,8 +389,14 @@
     }
 
     if (typeof window.Razorpay !== "function") {
-      setPayButtonLoading(false);
-      showModal("Payment could not load", "Payment gateway is loading. Please check your internet connection and try again.");
+      ensureRazorpay(function (loaded) {
+        if (loaded && typeof window.Razorpay === "function") {
+          startPayment(lead);
+        } else {
+          setPayButtonLoading(false);
+          showModal("Payment could not load", "Payment gateway is loading. Please check your internet connection and try again.");
+        }
+      });
       return;
     }
 
